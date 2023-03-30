@@ -1,0 +1,37 @@
+version: '3'
+
+networks:
+  app:
+    driver: bridge
+
+services:
+  app:
+    build: .
+    image: uno-collect-image
+    container_name: uno-collect-production
+    restart: unless-stopped
+    volumes:
+      - .:/home/node
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    entrypoint: ./.docker/entrypoint.sh
+    depends_on:
+      - db
+    networks:
+      - app
+
+  db:
+    image: mysql:5.7
+    container_name: uno-collect-db
+    restart: unless-stopped
+    volumes:
+      - ./.docker/db-data:/var/lib/mysql
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+    networks:
+      - app
